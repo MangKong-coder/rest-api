@@ -4,14 +4,19 @@ const Schema = mongoose.Schema;
 const postSchema = new Schema({
     title: {
         type: String,
-        requried: true
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
     },
     imageUrl: {
         type: String,
         required: true
     },
     creator: {
-        type: Object,
+        type: Schema.Types.ObjectId,
+        ref: 'User',
         required: true
     }
 }, {timestamps: true})
