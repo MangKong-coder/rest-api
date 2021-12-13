@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
+const dotenv = require('dotenv').config()
 
 
 const feedRoutes = require('./routes/feed');
@@ -34,11 +35,13 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-type, Authorization');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'OPTIONS, GET, POST, PUT, PATCH, DELETE'
+    );
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
-
-})
+  });
 
 app.use('/feed', feedRoutes);
 app.use('/auth', authRoutes);
@@ -50,7 +53,11 @@ app.use((error, req, res, next) => {
     res.status(status).json({message: message})
 })
 
-mongoose.connect('mongodb+srv://m001-student:m001-mongodb-basics@sandbox.xl9ji.mongodb.net/messages?retryWrites=true&w=majority')
+mongoose.connect(process.env.DB_URI)
 .then(result => {
-    app.listen(5000);
+    const server = app.listen(process.env.PORT);
+    const io = require('./socket').init(server);
+    io.on('connection', socket => {
+        console.log('Client connected')
+    })
 }).catch(err => console.log(err))
